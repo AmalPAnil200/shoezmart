@@ -44,6 +44,19 @@ app.use(
   }),
 );
 
+app.get("/create-admin", async (req, res) => {
+  const hashedPassword = await bcrypt.hash("admin123", 10);
+
+  await User.create({
+    name: "Admin",
+    email: "admin@shoezmart.com",
+    password: hashedPassword,
+    role: "admin",
+  });
+
+  res.send("Admin created");
+});
+
 app.use(express.json());
 // Serve the uploads folder so frontend can see images
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
