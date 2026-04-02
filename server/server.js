@@ -133,9 +133,17 @@ app.get("/reset-admin-password", async (req, res) => {
 // ─── Product Routes ──────────────────────────────────────────────────────────
 app.get("/api/products", async (req, res) => {
   try {
-    const products = await Product.findAll();
-    res.json(products);
+    const products = await Product.findAll(); // ✅ REQUIRED
+
+    const formattedProducts = products.map((p) => ({
+      ...p.toJSON(),
+      colors: p.colors ? p.colors.split(",").map((c) => c.trim()) : [],
+      sizes: p.sizes ? p.sizes.split(",").map((s) => s.trim()) : [],
+    }));
+
+    res.json(formattedProducts);
   } catch (error) {
+    console.error(error); // 🔥 add this for debugging
     res.status(500).json({ message: "Internal Server Error" });
   }
 });
