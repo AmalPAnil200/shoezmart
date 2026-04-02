@@ -133,8 +133,6 @@ app.get("/reset-admin-password", async (req, res) => {
 // ─── Product Routes ──────────────────────────────────────────────────────────
 app.get("/api/products", async (req, res) => {
   try {
-    const products = await Product.findAll(); // ✅ REQUIRED
-
     const formattedProducts = products.map((p) => ({
       ...p.toJSON(),
       colors: p.colors ? p.colors.split(",").map((c) => c.trim()) : [],
@@ -143,7 +141,6 @@ app.get("/api/products", async (req, res) => {
 
     res.json(formattedProducts);
   } catch (error) {
-    console.error(error); // 🔥 add this for debugging
     res.status(500).json({ message: "Internal Server Error" });
   }
 });
@@ -210,24 +207,23 @@ app.post(
 // server.js
 app.get("/api/products/search", async (req, res) => {
   try {
-    const { q, category } = req.query; // 👈 Extract category from the URL
+    const { q, category } = req.query;
     let whereCondition = {};
 
-    // 1. Handle Keyword Search (if user typed in search bar)
     if (q) {
       whereCondition.name = { [Op.iLike]: `%${q}%` };
     }
 
-    // 2. Handle Category Filter (for Men, Women, Basketball, etc.)
     if (category && category !== "All") {
-      // Case-insensitive match for category (works for most SQL dialects)
       whereCondition.category = sequelize.where(
         sequelize.fn("LOWER", sequelize.col("category")),
         category.toLowerCase(),
       );
     }
 
-    const products = await Product.findAll();
+    const products = await Product.findAll({
+      where: whereCondition, // ✅ FIXED
+    });
 
     const formattedProducts = products.map((p) => ({
       ...p.toJSON(),
