@@ -79,7 +79,6 @@ const Navbar = () => {
     localStorage.removeItem("userRole");
     clearCart();
     navigate("/login");
-    window.location.reload();
   };
 
   const cartCount = getCartCount();

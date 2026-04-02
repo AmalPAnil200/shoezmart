@@ -1,5 +1,11 @@
-
-import { Globe, Send, Link as LinkIcon, Mail, Phone, Clock } from "lucide-react";
+import {
+  Globe,
+  Send,
+  Link as LinkIcon,
+  Mail,
+  Phone,
+  Clock,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Footer = () => {
@@ -48,26 +54,30 @@ const Footer = () => {
             </button>
           </div>
         </div>
-
         {/* Quick Links */}
+
         <div>
-          <h4 className="text-xs uppercase tracking-[0.2em] font-semibold text-zinc-500 mb-4">
+          <h4 className="text-xs uppercase tracking-[0.2em] font-black text-zinc-500 mb-6 italic">
             Company
           </h4>
-          <ul className="space-y-2.5">
-            {["About Us", "Careers", "Press", "Blog"].map((item) => (
-              <li key={item}>
-                <a
-                  href="#"
-                  className="text-sm text-zinc-400 hover:text-white transition-colors hover:translate-x-1 inline-block"
+          <ul className="space-y-3">
+            {[
+              { name: "About Us", path: "/about" },
+              { name: "Careers", path: "/careers" },
+              { name: "Press", path: "/press" },
+              { name: "Blog", path: "/blog" },
+            ].map((item) => (
+              <li key={item.name}>
+                <Link
+                  to={item.path}
+                  className="text-[11px] font-bold uppercase tracking-widest text-zinc-400 hover:text-orange-500 transition-all hover:translate-x-1 inline-block"
                 >
-                  {item}
-                </a>
+                  {item.name}
+                </Link>
               </li>
             ))}
           </ul>
         </div>
-
         {/* Support */}
         <div>
           <h4 className="text-xs uppercase tracking-[0.2em] font-semibold text-zinc-500 mb-4">
@@ -92,7 +102,6 @@ const Footer = () => {
             ))}
           </ul>
         </div>
-
         {/* Contact */}
         <div>
           <h4 className="text-xs uppercase tracking-[0.2em] font-semibold text-zinc-500 mb-4">
