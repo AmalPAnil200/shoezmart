@@ -22,6 +22,7 @@ import About from "./pages/about";
 import Careers from "./pages/Careers";
 import Press from "./pages/Press";
 import Blog from "./pages/Blog";
+import AdminLogin from "./pages/admin/AdminLogin";
 
 function App() {
   const location = useLocation();
@@ -29,7 +30,8 @@ function App() {
   const isAdminPath = location.pathname.startsWith("/admin");
   const isLoginPath =
     location.pathname.startsWith("/login") ||
-    location.pathname.startsWith("/signup");
+    location.pathname.startsWith("/signup") ||
+    location.pathname === "/admin/login";
 
   return (
     <CartProvider>
@@ -165,6 +167,7 @@ function App() {
                 }
               />
               {/* Admin Route */}
+              <Route path="/admin/login" element={<AdminLogin />} />
               <Route
                 path="/admin"
                 element={
