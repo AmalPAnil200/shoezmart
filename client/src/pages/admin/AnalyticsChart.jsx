@@ -36,8 +36,8 @@ const FinancialPerformance = () => {
             },
           },
         );
-        const data = res.data; // Expected: [{name: "Jan", sales: 100, profit: 20, loss: 5}, ...]
-
+        const data = Array.isArray(res.data) ? res.data : [];
+        
         // Transform array of objects into arrays for Chart.js
         const transformed = {
           labels: data.map((d) => d.name),

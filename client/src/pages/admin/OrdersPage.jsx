@@ -39,7 +39,7 @@ const OrdersPage = () => {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         },
       );
-      setOrders(res.data);
+      setOrders(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error("Order fetch failed", err);
       setError(

@@ -20,7 +20,9 @@ const CategoryPage = ({ category, displayName, bannerColor }) => {
         const res = await axios.get(
           `${import.meta.env.VITE_API_BASE_URL}/api/products/search?category=${category}`,
         );
-        setProducts(res.data);
+        const data = Array.isArray(res.data) ? res.data : [];
+        console.log("Category API response (sanitized):", data);
+        setProducts(data);
       } catch (err) {
         console.error("Filter failed:", err);
       } finally {
@@ -32,6 +34,10 @@ const CategoryPage = ({ category, displayName, bannerColor }) => {
 
   // ── MULTI-FILTER LOGIC (Applied to the category results) ──
   const filteredProducts = useMemo(() => {
+    if (!Array.isArray(products)) {
+        console.error("ERROR: 'products' is not an array in CategoryPage useMemo:", products);
+        return [];
+    }
     return products.filter((p) => {
       const matchPrice = p.price <= priceRange;
 

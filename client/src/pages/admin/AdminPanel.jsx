@@ -36,7 +36,7 @@ const AdminPanel = () => {
       const res = await axios.get(
         `${import.meta.env.VITE_API_BASE_URL}/api/products`,
       );
-      setProducts(res.data);
+      setProducts(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error("Fetch failed:", err);
     }
