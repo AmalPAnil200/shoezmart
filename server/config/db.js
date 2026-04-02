@@ -18,7 +18,7 @@
 //   }
 // );
 
-module.exports = sequelize;
+//module.exports = sequelize;
 
 const { Sequelize } = require("sequelize");
 
