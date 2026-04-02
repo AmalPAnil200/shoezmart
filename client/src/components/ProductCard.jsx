@@ -15,7 +15,7 @@ const ProductCard = ({ product }) => {
 
   const imageSrc = product?.image?.startsWith("http")
     ? product.image
-    : `http://localhost:5000/uploads/${product.image}`;
+    : `${import.meta.env.VITE_API_BASE_URL}/uploads/${product.image}`;
 
   // Navigate to product detail page on Add to Bag
   const handleAddToBag = () => {
