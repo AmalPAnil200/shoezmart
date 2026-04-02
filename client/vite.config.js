@@ -6,7 +6,7 @@ import tailwindcss from "@tailwindcss/vite"; // Ensure this matches your install
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  base:process.env.VITE_BASE_PATH || "/shoezmart/",
+  base:process.env.VITE_BASE_PATH || "/",
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
