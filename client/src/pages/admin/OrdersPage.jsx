@@ -35,6 +35,9 @@ const OrdersPage = () => {
     try {
       const res = await axios.get(
         `${import.meta.env.VITE_API_BASE_URL}/api/admin/orders`,
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        },
       );
       setOrders(res.data);
     } catch (err) {
@@ -54,6 +57,9 @@ const OrdersPage = () => {
         `${import.meta.env.VITE_API_BASE_URL}/api/admin/orders/${orderId}`,
         {
           status: newStatus,
+        },
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         },
       );
       setOrders((prev) =>
@@ -78,6 +84,11 @@ const OrdersPage = () => {
       try {
         await axios.delete(
           `${import.meta.env.VITE_API_BASE_URL}/api/admin/orders/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          },
         );
         // Remove from local state — match by orderId string
         setOrders((prev) => prev.filter((o) => o.orderId !== id));

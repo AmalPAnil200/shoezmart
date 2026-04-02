@@ -51,6 +51,9 @@ const AdminPanel = () => {
         {
           stock: editStock,
         },
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        },
       );
       alert("Stock updated!");
       setEditingId(null); // Close the edit mode
@@ -82,7 +85,10 @@ const AdminPanel = () => {
         `${import.meta.env.VITE_API_BASE_URL}/api/admin/products`,
         formData,
         {
-          headers: { "Content-Type": "multipart/form-data" },
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         },
       );
 
@@ -111,6 +117,11 @@ const AdminPanel = () => {
       try {
         await axios.delete(
           `${import.meta.env.VITE_API_BASE_URL}/api/admin/products/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          },
         );
         fetchProducts();
       } catch (err) {

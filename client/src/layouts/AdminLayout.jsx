@@ -72,9 +72,11 @@ const AdminLayout = ({ children }) => {
 
           <button
             onClick={() => {
-              // Add your logout logic here
-              alert("Logged out");
+              localStorage.removeItem("token");
+              localStorage.removeItem("userName");
+              localStorage.removeItem("userRole");
               navigate("/login");
+              window.location.reload();
             }}
             className="w-full flex items-center gap-3 p-4 rounded-2xl text-red-500/50 hover:bg-red-500/10 hover:text-red-500 transition-all text-[11px] font-black uppercase tracking-widest"
           >

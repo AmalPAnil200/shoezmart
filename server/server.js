@@ -60,17 +60,46 @@ app.post("/api/auth/register", async (req, res) => {
   }
 });
 
+// ─── Middleware ─────────────────────────────────────────────────────────────
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+  if (!token) return res.sendStatus(401);
+
+  jwt.verify(token, process.env.JWT_SECRET || "SECRET", (err, user) => {
+    if (err) return res.sendStatus(403);
+    req.user = user;
+    next();
+  });
+};
+
+const isAdmin = async (req, res, next) => {
+  try {
+    const user = await User.findByPk(req.user.id);
+    if (user && user.role === "admin") {
+      next();
+    } else {
+      res.status(403).json({ error: "Access denied. Admins only." });
+    }
+  } catch (err) {
+    res.status(500).json({ error: "Authorization check failed" });
+  }
+};
+
 app.post("/api/auth/login", async (req, res) => {
   const { email, password } = req.body;
   try {
     const user = await User.findOne({ where: { email } });
     if (user && (await bcrypt.compare(password, user.password))) {
       const token = jwt.sign(
-        { id: user.id },
+        { id: user.id, role: user.role },
         process.env.JWT_SECRET || "SECRET",
         { expiresIn: "1d" },
       );
-      res.json({ token, user: { name: user.name, email: user.email } });
+      res.json({
+        token,
+        user: { name: user.name, email: user.email, role: user.role },
+      });
     } else {
       res.status(401).json({ error: "Invalid credentials" });
     }
@@ -91,7 +120,7 @@ app.get("/api/products", async (req, res) => {
 
 // ─── Utility Route: Normalize Product Categories ─────────────────────────────
 // Call this endpoint ONCE to fix all product categories in the DB
-app.post("/api/admin/normalize-categories", async (req, res) => {
+app.post("/api/admin/normalize-categories", authenticateToken, isAdmin, async (req, res) => {
   try {
     const products = await Product.findAll();
     for (const product of products) {
@@ -190,7 +219,7 @@ app.get("/api/products/:id", async (req, res) => {
 // ─── Admin Routes (With Image Upload) ─────────────────────────────────────────
 
 // Fixed: Only ONE POST route for adding products
-app.post("/api/admin/products", upload.single("image"), async (req, res) => {
+app.post("/api/admin/products", authenticateToken, isAdmin, upload.single("image"), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: "Image required" });
 
@@ -224,7 +253,7 @@ app.post("/api/admin/products", upload.single("image"), async (req, res) => {
   }
 });
 
-app.put("/api/admin/products/:id", async (req, res) => {
+app.put("/api/admin/products/:id", authenticateToken, isAdmin, async (req, res) => {
   try {
     await Product.update(req.body, { where: { id: req.params.id } });
     res.json({ message: "Product updated!" });
@@ -233,7 +262,7 @@ app.put("/api/admin/products/:id", async (req, res) => {
   }
 });
 
-app.delete("/api/admin/products/:id", async (req, res) => {
+app.delete("/api/admin/products/:id", authenticateToken, isAdmin, async (req, res) => {
   try {
     await Product.destroy({ where: { id: req.params.id } });
     res.json({ message: "Product deleted!" });
@@ -284,7 +313,7 @@ app.post("/api/orders/success", async (req, res) => {
 });
 
 // ── 2. UPDATE ORDER STATUS (Called by Admin Orders Page) ──
-app.put("/api/admin/orders/:id", async (req, res) => {
+app.put("/api/admin/orders/:id", authenticateToken, isAdmin, async (req, res) => {
   try {
     const { status } = req.body;
     await Order.update({ status }, { where: { orderId: req.params.id } });
@@ -295,7 +324,7 @@ app.put("/api/admin/orders/:id", async (req, res) => {
 });
 
 // ── 3. DELETE ORDER ROUTE ──
-app.delete("/api/admin/orders/:id", async (req, res) => {
+app.delete("/api/admin/orders/:id", authenticateToken, isAdmin, async (req, res) => {
   try {
     const deleted = await Order.destroy({
       where: { orderId: req.params.id }, // orderId is the string key e.g. "SZ-XXXXXXX"
@@ -329,7 +358,7 @@ async function startServer() {
   }
 }
 
-app.get("/api/admin/sales-stats", async (req, res) => {
+app.get("/api/admin/sales-stats", authenticateToken, isAdmin, async (req, res) => {
   try {
     // Fetch all orders to calculate stats
     const orders = await Order.findAll();
@@ -364,7 +393,7 @@ app.get("/api/admin/sales-stats", async (req, res) => {
 // (PUT route defined above at line 265 — no duplicate needed)
 
 // 3. Admin Route to fetch all orders
-app.get("/api/admin/orders", async (req, res) => {
+app.get("/api/admin/orders", authenticateToken, isAdmin, async (req, res) => {
   try {
     const orders = await Order.findAll({
       order: [["createdAt", "DESC"]],

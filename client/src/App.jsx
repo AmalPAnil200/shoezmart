@@ -17,6 +17,7 @@ import Shop from "./pages/Shop";
 import OrdersPage from "./pages/admin/OrdersPage";
 import Checkout from "./pages/Checkout";
 import AnalyticsChart from "./pages/admin/AnalyticsChart";
+import ProtectedRoute from "./components/ProtectedRoute"; // 👈 Added
 
 function App() {
   const location = useLocation();
@@ -100,13 +101,33 @@ function App() {
                 <Route path="/wishlist" element={<Wishlist />} />
                 <Route path="/search" element={<SearchPage />} />
                 <Route path="/shop" element={<Shop />} />
-                <Route path="/admin/orders" element={<OrdersPage />} />
+                <Route
+                  path="/admin/orders"
+                  element={
+                    <ProtectedRoute adminOnly>
+                      <OrdersPage />
+                    </ProtectedRoute>
+                  }
+                />
                 <Route path="/checkout" element={<Checkout />} />
-                <Route path="/admin/AnalyticsChart" element={<AnalyticsChart />} />
-
+                <Route
+                  path="/admin/AnalyticsChart"
+                  element={
+                    <ProtectedRoute adminOnly>
+                      <AnalyticsChart />
+                    </ProtectedRoute>
+                  }
+                />
 
                 {/* Admin Route */}
-                <Route path="/admin" element={<AdminPanel />} />
+                <Route
+                  path="/admin"
+                  element={
+                    <ProtectedRoute adminOnly>
+                      <AdminPanel />
+                    </ProtectedRoute>
+                  }
+                />
               </Routes>
             </main>
 

@@ -36,6 +36,7 @@ const Navbar = () => {
 
   const token = localStorage.getItem("token");
   const userName = localStorage.getItem("userName");
+  const userRole = localStorage.getItem("userRole"); // 👈 Added
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -73,9 +74,12 @@ const Navbar = () => {
   };
 
   const handleLogout = () => {
-    localStorage.clear();
+    localStorage.removeItem("token");
+    localStorage.removeItem("userName");
+    localStorage.removeItem("userRole");
     clearCart();
     navigate("/login");
+    window.location.reload();
   };
 
   const cartCount = getCartCount();
@@ -162,6 +166,14 @@ const Navbar = () => {
                       <span className="text-[13px] font-bold text-zinc-700 px-3">
                         Hi, {userName || "User"}
                       </span>
+                      {userRole === "admin" && (
+                        <Link
+                          to="/admin"
+                          className="text-[13px] font-bold text-orange-500 hover:text-orange-600 px-3 transition-colors"
+                        >
+                          Admin Panel
+                        </Link>
+                      )}
                       <button
                         onClick={handleLogout}
                         className="flex items-center gap-1.5 px-3 py-2 rounded-full text-[13px] font-semibold text-zinc-500 hover:text-red-500 hover:bg-red-50 transition-all"

@@ -23,8 +23,13 @@ const Login = () => {
 
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("userName", res.data.user.name);
+      localStorage.setItem("userRole", res.data.user.role);
 
-      navigate("/");
+      if (res.data.user.role === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/");
+      }
       window.location.reload();
     } catch (err) {
       alert("Invalid Credentials");

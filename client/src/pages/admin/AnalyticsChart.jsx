@@ -30,6 +30,11 @@ const FinancialPerformance = () => {
       try {
         const res = await axios.get(
           `${import.meta.env.VITE_API_BASE_URL}/api/admin/sales-stats`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          },
         );
         const data = res.data; // Expected: [{name: "Jan", sales: 100, profit: 20, loss: 5}, ...]
 
