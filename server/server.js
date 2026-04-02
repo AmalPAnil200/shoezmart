@@ -224,7 +224,7 @@ app.get("/api/products/:id", async (req, res) => {
     colors: product.colors
       ? product.colors.split(",").map((c) => c.trim())
       : [],
-    sizes: product.sizes ? product.sizes.split(",").map((s) => s.trim()) : [],
+    sizes: p.sizes ? p.sizes.split(",").map((s) => s.trim()) : [],
   };
 
   res.json(formatted);
