@@ -35,7 +35,7 @@ const Home = () => {
           ? `${import.meta.env.VITE_API_BASE_URL}/api/products/search?q=${searchQuery}`
           : `${import.meta.env.VITE_API_BASE_URL}/api/products`;
         const res = await axios.get(url);
-        setProducts(res.data);
+        setProducts(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
         console.error("Could not load shoes:", err);
       } finally {

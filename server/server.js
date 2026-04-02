@@ -206,8 +206,6 @@ app.get("/api/products/search", async (req, res) => {
     }));
 
     res.json(formattedProducts);
-
-    res.json(products);
   } catch (err) {
     console.error("Search Error:", err);
     res.status(500).json({ error: "Search failed" });
@@ -224,7 +222,7 @@ app.get("/api/products/:id", async (req, res) => {
     colors: product.colors
       ? product.colors.split(",").map((c) => c.trim())
       : [],
-    sizes: p.sizes ? p.sizes.split(",").map((s) => s.trim()) : [],
+    sizes: product.sizes ? product.sizes.split(",").map((s) => s.trim()) : [],
   };
 
   res.json(formatted);

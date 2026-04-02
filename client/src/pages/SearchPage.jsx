@@ -25,14 +25,16 @@ const SearchPage = () => {
                     : `${import.meta.env.VITE_API_BASE_URL}/api/products/search?q=${query}`;
 
                 const res = await axios.get(endpoint);
-                setProducts(res.data);
+                const data = Array.isArray(res.data) ? res.data : [];
+                setProducts(data);
 
                 // Fetch recommendations only if results are empty
                 if (res.data.length === 0) {
                     const recRes = await axios.get(
                         `${import.meta.env.VITE_API_BASE_URL}/api/products`,
                     );
-                    setRecommendations(recRes.data.slice(0, 4));
+                    const recData = Array.isArray(recRes.data) ? recRes.data : [];
+                    setRecommendations(recData.slice(0, 4));
                 }
             } catch (err) {
                 console.error("Search failed:", err);
