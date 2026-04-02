@@ -25,9 +25,9 @@ const storage = multer.diskStorage({
   },
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// app.listen(PORT, () => {
+//   console.log(`Server running on port ${PORT}`);
+// });
 
 // THIS IS THE LINE YOU WERE MISSING OR HAD IN THE WRONG PLACE
 const upload = multer({ storage });
@@ -35,11 +35,15 @@ const upload = multer({ storage });
 // ─── Middleware ───────────────────────────────────────────────────────────────
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://your-frontend.vercel.app"],
+    origin: [
+      "http://localhost:5173",
+      "https://shoezmart.vercel.app", // 👈 your REAL URL
+    ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   }),
 );
+
 app.use(express.json());
 // Serve the uploads folder so frontend can see images
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
