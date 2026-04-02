@@ -180,7 +180,7 @@ app.get("/api/products/search", async (req, res) => {
 
     // 1. Handle Keyword Search (if user typed in search bar)
     if (q) {
-      whereCondition.name = { [Op.like]: `%${q}%` };
+      whereCondition.name = { [Op.iLike]: `%${q}%` };
     }
 
     // 2. Handle Category Filter (for Men, Women, Basketball, etc.)
