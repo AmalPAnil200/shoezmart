@@ -112,12 +112,22 @@ app.post("/api/auth/login", async (req, res) => {
   }
 });
 
-
 app.get("/check-user", async (req, res) => {
   const user = await User.findOne({
     where: { email: "admin@shoezmart.com" },
   });
   res.json(user);
+});
+
+app.get("/reset-admin-password", async (req, res) => {
+  const hashedPassword = await bcrypt.hash("admin123", 10);
+
+  await User.update(
+    { password: hashedPassword },
+    { where: { email: "admin@shoezmart.com" } },
+  );
+
+  res.send("Admin password reset to admin123");
 });
 
 // ─── Product Routes ──────────────────────────────────────────────────────────
