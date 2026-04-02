@@ -44,19 +44,6 @@ app.use(
   }),
 );
 
-app.get("/create-admin", async (req, res) => {
-  const hashedPassword = await bcrypt.hash("admin123", 10);
-
-  await User.create({
-    name: "Admin",
-    email: "admin@shoezmart.com",
-    password: hashedPassword,
-    role: "admin",
-  });
-
-  res.send("Admin created");
-});
-
 app.use(express.json());
 // Serve the uploads folder so frontend can see images
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
@@ -111,7 +98,11 @@ app.post("/api/auth/login", async (req, res) => {
       );
       res.json({
         token,
-        user: { name: user.name, email: user.email, role: user.role },
+        user: {
+          name: user.name,
+          email: user.email,
+          role: user.role?.toLowerCase(), // ✅ FIX
+        },
       });
     } else {
       res.status(401).json({ error: "Invalid credentials" });
@@ -119,6 +110,14 @@ app.post("/api/auth/login", async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: "Login failed" });
   }
+});
+
+
+app.get("/check-user", async (req, res) => {
+  const user = await User.findOne({
+    where: { email: "admin@shoezmart.com" },
+  });
+  res.json(user);
 });
 
 // ─── Product Routes ──────────────────────────────────────────────────────────
