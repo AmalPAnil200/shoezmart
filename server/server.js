@@ -33,7 +33,13 @@ app.listen(PORT, () => {
 const upload = multer({ storage });
 
 // ─── Middleware ───────────────────────────────────────────────────────────────
-app.use(cors());
+app.use(
+  cors({
+    origin: ["http://localhost:5173", "https://your-frontend.vercel.app"],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  }),
+);
 app.use(express.json());
 // Serve the uploads folder so frontend can see images
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
