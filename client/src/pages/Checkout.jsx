@@ -6,6 +6,7 @@ import {
   MapPin, CreditCard, Truck, CheckCircle2,
   Loader2, ChevronRight, ShieldCheck, Smartphone
 } from "lucide-react";
+import { API_BASE_URL } from "../api/config";
 
 const Checkout = () => {
   const { cart, removeFromCart, clearCart } = useCart();
@@ -42,7 +43,7 @@ const Checkout = () => {
       try {
         const orderID = `SZ-${Math.random().toString(36).substr(2, 7).toUpperCase()}`;
         await axios.post(
-          `${import.meta.env.VITE_API_BASE_URL}/api/orders/success`,
+          `${API_BASE_URL}/api/orders/success`,
           {
             cartItems: cart,
             orderID: orderID,
@@ -165,7 +166,7 @@ const Checkout = () => {
               {cart.map(item => (
                 <div key={item.id} className="flex gap-4 items-center">
                   <div className="w-16 h-16 bg-white rounded-2xl border border-zinc-100 p-2 shrink-0">
-                    <img src={item.image?.startsWith('http') ? item.image : `http://localhost:5000/uploads/${item.image}`} className="w-full h-full object-contain" />
+                    <img src={item.image?.startsWith('http') ? item.image : `${API_BASE_URL}/uploads/${item.image}`} className="w-full h-full object-contain" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-[11px] font-black uppercase italic text-zinc-900 truncate">{item.name}</p>

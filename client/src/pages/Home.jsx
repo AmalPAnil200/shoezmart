@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useLocation, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import ProductCard from "../components/ProductCard";
+import { API_BASE_URL } from "../api/config";
 import sneakerHero from "../assets/images/s-1.png";
 import Hero from "../components/Hero";
 
@@ -32,8 +33,8 @@ const Home = () => {
       setLoading(true);
       try {
         const url = searchQuery
-          ? `${import.meta.env.VITE_API_BASE_URL}/api/products/search?q=${searchQuery}`
-          : `${import.meta.env.VITE_API_BASE_URL}/api/products`;
+          ? `${API_BASE_URL}/api/products/search?q=${searchQuery}`
+          : `${API_BASE_URL}/api/products`;
         const res = await axios.get(url);
         setProducts(Array.isArray(res.data) ? res.data : []);
       } catch (err) {

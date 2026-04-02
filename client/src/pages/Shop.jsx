@@ -20,7 +20,7 @@ const Shop = () => {
       setLoading(true);
       try {
         const res = await axios.get(
-          `${import.meta.env.VITE_API_BASE_URL}/api/products`,
+          `${API_BASE_URL}/api/products`,
         );
         setProducts(Array.isArray(res.data) ? res.data : []);
       } catch (err) {

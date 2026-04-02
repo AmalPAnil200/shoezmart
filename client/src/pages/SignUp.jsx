@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
+import { API_BASE_URL } from '../api/config';
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
@@ -27,7 +28,7 @@ const SignUp = () => {
     setLoading(true);
     try {
       await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}/api/auth/register`,
+        `${API_BASE_URL}/api/auth/register`,
         {
           name: formData.name,
           email: formData.email,

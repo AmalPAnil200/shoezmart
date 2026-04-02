@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Heart, AlertCircle } from "lucide-react";
 import { useCart } from "../context/CartContext";
 import { useWishlist } from "../context/WishlistContext";
+import { API_BASE_URL } from "../api/config";
 
 import { useNavigate } from "react-router-dom";
 
@@ -15,7 +16,7 @@ const ProductCard = ({ product }) => {
 
   const imageSrc = product?.image?.startsWith("http")
     ? product.image
-    : `${import.meta.env.VITE_API_BASE_URL}/uploads/${product.image}`;
+    : `${API_BASE_URL}/uploads/${product.image}`;
 
   // Navigate to product detail page on Add to Bag
   const handleAddToBag = () => {
