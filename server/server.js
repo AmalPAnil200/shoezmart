@@ -25,6 +25,10 @@ const storage = multer.diskStorage({
   },
 });
 
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
+
 // THIS IS THE LINE YOU WERE MISSING OR HAD IN THE WRONG PLACE
 const upload = multer({ storage });
 
@@ -180,8 +184,16 @@ app.post("/api/admin/products", upload.single("image"), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: "Image required" });
 
-    const { name, price, category, stock, colors, sizes, description, purchasePrice } =
-      req.body;
+    const {
+      name,
+      price,
+      category,
+      stock,
+      colors,
+      sizes,
+      description,
+      purchasePrice,
+    } = req.body;
 
     const product = await Product.create({
       name,
@@ -272,7 +284,6 @@ app.put("/api/admin/orders/:id", async (req, res) => {
   }
 });
 
-
 // ── 3. DELETE ORDER ROUTE ──
 app.delete("/api/admin/orders/:id", async (req, res) => {
   try {
@@ -316,17 +327,17 @@ app.get("/api/admin/sales-stats", async (req, res) => {
     // Grouping logic (e.g., by month)
     const stats = orders.reduce((acc, order) => {
       const date = new Date(order.createdAt);
-      const month = date.toLocaleString('default', { month: 'short' });
+      const month = date.toLocaleString("default", { month: "short" });
 
       if (!acc[month]) {
         acc[month] = { name: month, sales: 0, profit: 0, loss: 0 };
       }
 
       const orderTotal = Number(order.totalAmount);
-      
+
       // Basic math: 20% profit margin, 5% loss estimate
       acc[month].sales += orderTotal;
-      acc[month].profit += orderTotal * 0.20; 
+      acc[month].profit += orderTotal * 0.2;
       acc[month].loss += orderTotal * 0.05;
 
       return acc;
