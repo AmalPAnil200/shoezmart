@@ -120,25 +120,30 @@ app.get("/api/products", async (req, res) => {
 
 // ─── Utility Route: Normalize Product Categories ─────────────────────────────
 // Call this endpoint ONCE to fix all product categories in the DB
-app.post("/api/admin/normalize-categories", authenticateToken, isAdmin, async (req, res) => {
-  try {
-    const products = await Product.findAll();
-    for (const product of products) {
-      // Remove non-letters, make lowercase, trim spaces
-      const cleanCategory = (product.category || "")
-        .toLowerCase()
-        .replace(/[^a-z]/g, "")
-        .trim();
-      if (product.category !== cleanCategory) {
-        product.category = cleanCategory;
-        await product.save();
+app.post(
+  "/api/admin/normalize-categories",
+  authenticateToken,
+  isAdmin,
+  async (req, res) => {
+    try {
+      const products = await Product.findAll();
+      for (const product of products) {
+        // Remove non-letters, make lowercase, trim spaces
+        const cleanCategory = (product.category || "")
+          .toLowerCase()
+          .replace(/[^a-z]/g, "")
+          .trim();
+        if (product.category !== cleanCategory) {
+          product.category = cleanCategory;
+          await product.save();
+        }
       }
+      res.json({ message: "Categories normalized!" });
+    } catch (err) {
+      res.status(500).json({ error: "Normalization failed" });
     }
-    res.json({ message: "Categories normalized!" });
-  } catch (err) {
-    res.status(500).json({ error: "Normalization failed" });
-  }
-});
+  },
+);
 
 // Replace your Search Route in server.js with this:
 // In your server.js search route
@@ -192,9 +197,15 @@ app.get("/api/products/search", async (req, res) => {
       );
     }
 
-    const products = await Product.findAll({
-      where: whereCondition,
-    });
+    const products = await Product.findAll();
+
+    const formattedProducts = products.map((p) => ({
+      ...p.toJSON(),
+      colors: p.colors ? p.colors.split(",").map((c) => c.trim()) : [],
+      sizes: p.sizes ? p.sizes.split(",").map((s) => s.trim()) : [],
+    }));
+
+    res.json(formattedProducts);
 
     res.json(products);
   } catch (err) {
@@ -204,72 +215,91 @@ app.get("/api/products/search", async (req, res) => {
 });
 
 app.get("/api/products/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const product = await Product.findByPk(id);
-    if (!product) {
-      return res.status(404).json({ error: "Product not found" });
-    }
-    res.json(product);
-  } catch (err) {
-    res.status(500).json({ error: "Failed to fetch product" });
-  }
+  const product = await Product.findByPk(req.params.id);
+
+  if (!product) return res.status(404).json({ error: "Not found" });
+
+  const formatted = {
+    ...product.toJSON(),
+    colors: product.colors
+      ? product.colors.split(",").map((c) => c.trim())
+      : [],
+    sizes: product.sizes ? product.sizes.split(",").map((s) => s.trim()) : [],
+  };
+
+  res.json(formatted);
 });
 
 // ─── Admin Routes (With Image Upload) ─────────────────────────────────────────
 
 // Fixed: Only ONE POST route for adding products
-app.post("/api/admin/products", authenticateToken, isAdmin, upload.single("image"), async (req, res) => {
-  try {
-    if (!req.file) return res.status(400).json({ error: "Image required" });
+app.post(
+  "/api/admin/products",
+  authenticateToken,
+  isAdmin,
+  upload.single("image"),
+  async (req, res) => {
+    try {
+      if (!req.file) return res.status(400).json({ error: "Image required" });
 
-    const {
-      name,
-      price,
-      category,
-      stock,
-      colors,
-      sizes,
-      description,
-      purchasePrice,
-    } = req.body;
+      const {
+        name,
+        price,
+        category,
+        stock,
+        colors,
+        sizes,
+        description,
+        purchasePrice,
+      } = req.body;
 
-    const product = await Product.create({
-      name,
-      price,
-      purchasePrice,
-      category,
-      stock,
-      colors, // Save the string "Red, Blue"
-      sizes, // Save the string "7, 8, 9"
-      description,
-      image: req.file.filename,
-    });
+      const product = await Product.create({
+        name,
+        price,
+        purchasePrice,
+        category,
+        stock,
+        colors, // Save the string "Red, Blue"
+        sizes, // Save the string "7, 8, 9"
+        description,
+        image: req.file.filename,
+      });
 
-    res.json({ message: "Success", product });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Upload failed" });
-  }
-});
+      res.json({ message: "Success", product });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: "Upload failed" });
+    }
+  },
+);
 
-app.put("/api/admin/products/:id", authenticateToken, isAdmin, async (req, res) => {
-  try {
-    await Product.update(req.body, { where: { id: req.params.id } });
-    res.json({ message: "Product updated!" });
-  } catch (err) {
-    res.status(500).json({ error: "Update failed" });
-  }
-});
+app.put(
+  "/api/admin/products/:id",
+  authenticateToken,
+  isAdmin,
+  async (req, res) => {
+    try {
+      await Product.update(req.body, { where: { id: req.params.id } });
+      res.json({ message: "Product updated!" });
+    } catch (err) {
+      res.status(500).json({ error: "Update failed" });
+    }
+  },
+);
 
-app.delete("/api/admin/products/:id", authenticateToken, isAdmin, async (req, res) => {
-  try {
-    await Product.destroy({ where: { id: req.params.id } });
-    res.json({ message: "Product deleted!" });
-  } catch (err) {
-    res.status(500).json({ error: "Delete failed" });
-  }
-});
+app.delete(
+  "/api/admin/products/:id",
+  authenticateToken,
+  isAdmin,
+  async (req, res) => {
+    try {
+      await Product.destroy({ where: { id: req.params.id } });
+      res.json({ message: "Product deleted!" });
+    } catch (err) {
+      res.status(500).json({ error: "Delete failed" });
+    }
+  },
+);
 
 // ─── Order Routes ────────────────────────────────────────────────────────────
 // ── 1. CREATE ORDER ROUTE (Called by Checkout page) ──
@@ -313,33 +343,43 @@ app.post("/api/orders/success", async (req, res) => {
 });
 
 // ── 2. UPDATE ORDER STATUS (Called by Admin Orders Page) ──
-app.put("/api/admin/orders/:id", authenticateToken, isAdmin, async (req, res) => {
-  try {
-    const { status } = req.body;
-    await Order.update({ status }, { where: { orderId: req.params.id } });
-    res.json({ message: "Status updated" });
-  } catch (err) {
-    res.status(500).json({ error: "Update failed" });
-  }
-});
+app.put(
+  "/api/admin/orders/:id",
+  authenticateToken,
+  isAdmin,
+  async (req, res) => {
+    try {
+      const { status } = req.body;
+      await Order.update({ status }, { where: { orderId: req.params.id } });
+      res.json({ message: "Status updated" });
+    } catch (err) {
+      res.status(500).json({ error: "Update failed" });
+    }
+  },
+);
 
 // ── 3. DELETE ORDER ROUTE ──
-app.delete("/api/admin/orders/:id", authenticateToken, isAdmin, async (req, res) => {
-  try {
-    const deleted = await Order.destroy({
-      where: { orderId: req.params.id }, // orderId is the string key e.g. "SZ-XXXXXXX"
-    });
+app.delete(
+  "/api/admin/orders/:id",
+  authenticateToken,
+  isAdmin,
+  async (req, res) => {
+    try {
+      const deleted = await Order.destroy({
+        where: { orderId: req.params.id }, // orderId is the string key e.g. "SZ-XXXXXXX"
+      });
 
-    if (!deleted) {
-      return res.status(404).json({ error: "Order not found" });
+      if (!deleted) {
+        return res.status(404).json({ error: "Order not found" });
+      }
+
+      res.json({ message: "Order deleted successfully" });
+    } catch (err) {
+      console.error("Delete failed:", err);
+      res.status(500).json({ error: "Delete failed" });
     }
-
-    res.json({ message: "Order deleted successfully" });
-  } catch (err) {
-    console.error("Delete failed:", err);
-    res.status(500).json({ error: "Delete failed" });
-  }
-});
+  },
+);
 
 // ─── Bootstrap ────────────────────────────────────────────────────────────────
 async function startServer() {
@@ -358,37 +398,42 @@ async function startServer() {
   }
 }
 
-app.get("/api/admin/sales-stats", authenticateToken, isAdmin, async (req, res) => {
-  try {
-    // Fetch all orders to calculate stats
-    const orders = await Order.findAll();
+app.get(
+  "/api/admin/sales-stats",
+  authenticateToken,
+  isAdmin,
+  async (req, res) => {
+    try {
+      // Fetch all orders to calculate stats
+      const orders = await Order.findAll();
 
-    // Grouping logic (e.g., by month)
-    const stats = orders.reduce((acc, order) => {
-      const date = new Date(order.createdAt);
-      const month = date.toLocaleString("default", { month: "short" });
+      // Grouping logic (e.g., by month)
+      const stats = orders.reduce((acc, order) => {
+        const date = new Date(order.createdAt);
+        const month = date.toLocaleString("default", { month: "short" });
 
-      if (!acc[month]) {
-        acc[month] = { name: month, sales: 0, profit: 0, loss: 0 };
-      }
+        if (!acc[month]) {
+          acc[month] = { name: month, sales: 0, profit: 0, loss: 0 };
+        }
 
-      const orderTotal = Number(order.totalAmount);
+        const orderTotal = Number(order.totalAmount);
 
-      // Basic math: 20% profit margin, 5% loss estimate
-      acc[month].sales += orderTotal;
-      acc[month].profit += orderTotal * 0.2;
-      acc[month].loss += orderTotal * 0.05;
+        // Basic math: 20% profit margin, 5% loss estimate
+        acc[month].sales += orderTotal;
+        acc[month].profit += orderTotal * 0.2;
+        acc[month].loss += orderTotal * 0.05;
 
-      return acc;
-    }, {});
+        return acc;
+      }, {});
 
-    // Convert object back to array for Chart.js
-    res.json(Object.values(stats));
-  } catch (err) {
-    console.error("Graph Data Error:", err);
-    res.status(500).json({ error: "Failed to generate stats" });
-  }
-});
+      // Convert object back to array for Chart.js
+      res.json(Object.values(stats));
+    } catch (err) {
+      console.error("Graph Data Error:", err);
+      res.status(500).json({ error: "Failed to generate stats" });
+    }
+  },
+);
 
 // (PUT route defined above at line 265 — no duplicate needed)
 
