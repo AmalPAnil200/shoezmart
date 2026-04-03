@@ -23,6 +23,7 @@ import Careers from "./pages/Careers";
 import Press from "./pages/Press";
 import Blog from "./pages/Blog";
 import AdminLogin from "./pages/admin/AdminLogin";
+import { Analytics } from "@vercel/analytics/next";
 
 function App() {
   const location = useLocation();
@@ -36,6 +37,7 @@ function App() {
   return (
     <CartProvider>
       <WishlistProvider>
+        <Analytics />
         <div className="app-wrapper min-h-screen flex flex-col">
           {/* Navbar hides on Admin routes */}
           {!isAdminPath && !isLoginPath && <Navbar />}
