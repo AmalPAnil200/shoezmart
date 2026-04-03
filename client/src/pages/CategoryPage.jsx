@@ -208,7 +208,7 @@ const CategoryPage = ({ category, displayName, bannerColor }) => {
           <div className="flex justify-between items-end mb-10 pb-4 border-b border-zinc-100">
             <p className="text-zinc-400 text-[10px] font-bold uppercase tracking-widest">
               {filteredProducts.length} Styles Found
-              {products[0]?.id?.includes("demo") && (
+              {products[0]?.id?.toString().includes("demo") && (
                 <span className="ml-2 text-orange-500">[Demo Mode]</span>
               )}
             </p>
