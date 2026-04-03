@@ -12,19 +12,53 @@ const CategoryPage = ({ category, displayName, bannerColor }) => {
   const [selectedSizes, setSelectedSizes] = useState([]);
   const [selectedColors, setSelectedColors] = useState([]);
 
+  // demo products
+
+  const DEMO_PRODUCTS = [
+    {
+      id: "demo-1",
+      name: "Air Max Pulse (Demo)",
+      price: 12500,
+      category: "men",
+      image:
+        "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=2070",
+      sizes: ["7", "8", "9", "10"],
+      colors: ["Red", "Black"],
+      stock: 10,
+    },
+    {
+      id: "demo-2",
+      name: "UltraBoost 22 (Demo)",
+      price: 18000,
+      category: "women",
+      image:
+        "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?q=80&w=1974",
+      sizes: ["7", "8", "11"],
+      colors: ["White", "Blue"],
+      stock: 5,
+    },
+  ];
+
   useEffect(() => {
     const fetchFilteredProducts = async () => {
       setLoading(true);
       try {
-        // Fetch products for this specific category (men, women, kids, etc.)
         const res = await axios.get(
           `${import.meta.env.VITE_API_BASE_URL}/api/products/search?category=${category}`,
         );
+
         const data = Array.isArray(res.data) ? res.data : [];
-        console.log("Category API response (sanitized):", data);
-        setProducts(data);
+
+        // ✨ IF DATA IS EMPTY, USE DEMO PRODUCTS
+        if (data.length === 0) {
+          console.warn("No real products found, loading demo products.");
+          setProducts(DEMO_PRODUCTS);
+        } else {
+          setProducts(data);
+        }
       } catch (err) {
-        console.error("Filter failed:", err);
+        console.error("Filter failed, falling back to demo:", err);
+        setProducts(DEMO_PRODUCTS); // Fallback on error too
       } finally {
         setLoading(false);
       }
@@ -174,6 +208,9 @@ const CategoryPage = ({ category, displayName, bannerColor }) => {
           <div className="flex justify-between items-end mb-10 pb-4 border-b border-zinc-100">
             <p className="text-zinc-400 text-[10px] font-bold uppercase tracking-widest">
               {filteredProducts.length} Styles Found
+              {products[0]?.id?.includes("demo") && (
+                <span className="ml-2 text-orange-500">[Demo Mode]</span>
+              )}
             </p>
           </div>
 

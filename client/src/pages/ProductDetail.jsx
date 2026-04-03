@@ -12,6 +12,15 @@ const ProductDetail = () => {
 
   const [selectedSize, setSelectedSize] = useState(null);
   const [selectedColor, setSelectedColor] = useState("");
+  const [isAdded, setIsAdded] = useState(false);
+
+  const handleAddToCart = () => {
+    addToCart({ ...product, selectedSize, selectedColor });
+    setIsAdded(true);
+
+    // Revert back to "Add to Bag" after 2 seconds
+    setTimeout(() => setIsAdded(false), 2000);
+  };
 
   // Prepare Data
   const sizes = Array.isArray(product?.sizes)
@@ -176,21 +185,23 @@ const ProductDetail = () => {
 
             {/* ── Add to Cart Button ── */}
             <button
-              disabled={product.stock <= 0 || !selectedSize}
-              onClick={() =>
-                addToCart({ ...product, selectedSize, selectedColor })
-              }
+              disabled={product.stock <= 0 || !selectedSize || isAdded}
+              onClick={handleAddToCart}
               className={`w-full py-6 rounded-[32px] font-black uppercase tracking-widest text-lg transition-all active:scale-95 shadow-2xl ${
-                product.stock > 0 && selectedSize
-                  ? "bg-zinc-900 text-white hover:bg-orange-500 shadow-orange-200"
-                  : "bg-zinc-100 text-zinc-300 cursor-not-allowed border border-zinc-200 shadow-none"
+                isAdded
+                  ? "bg-green-500 text-white shadow-green-100" // Success state colors
+                  : product.stock > 0 && selectedSize
+                    ? "bg-zinc-900 text-white hover:bg-orange-500 shadow-orange-200"
+                    : "bg-zinc-100 text-zinc-300 cursor-not-allowed border border-zinc-200 shadow-none"
               }`}
             >
-              {product.stock <= 0
-                ? "Sold Out"
-                : !selectedSize
-                  ? "Select a Size"
-                  : "Add to Bag"}
+              {isAdded
+                ? "Added to Bag"
+                : product.stock <= 0
+                  ? "Sold Out"
+                  : !selectedSize
+                    ? "Select a Size"
+                    : "Add to Bag"}
             </button>
           </div>
         </div>

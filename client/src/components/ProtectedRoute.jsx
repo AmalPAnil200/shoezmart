@@ -5,16 +5,26 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
   const userRole = localStorage.getItem("userRole");
 
   if (!token) {
-    return <Navigate to={adminOnly ? "/admin/login" : "/login"} replace />;
+    // We pass a 'message' in the state so the Login page knows to show an alert
+    return (
+      <Navigate 
+        to={adminOnly ? "/admin/login" : "/login"} 
+        state={{ message: "Please login to access this page." }} 
+        replace 
+      />
+    );
   }
 
   if (adminOnly && userRole !== "admin") {
-    // If not an admin, redirect them to the admin login or back to shop?
-    // Usually, unauthorized access to admin area should redirect back to /admin/login 
-    // to prompt for admin credentials specifically.
     localStorage.removeItem("token");
     localStorage.removeItem("userRole"); 
-    return <Navigate to="/admin/login" replace />;
+    return (
+      <Navigate 
+        to="/admin/login" 
+        state={{ message: "Admin access required. Please log in with an admin account." }} 
+        replace 
+      />
+    );
   }
 
   return children;

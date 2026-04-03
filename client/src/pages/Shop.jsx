@@ -6,13 +6,13 @@ import { Filter, X } from "lucide-react";
 const Shop = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  
+
   // ── FILTER STATE ──
   const [filters, setFilters] = useState({
     category: "All",
     priceRange: 20000,
     selectedSizes: [],
-    selectedColors: []
+    selectedColors: [],
   });
 
   useEffect(() => {
@@ -20,7 +20,7 @@ const Shop = () => {
       setLoading(true);
       try {
         const res = await axios.get(
-          `${API_BASE_URL}/api/products`,
+          `${import.meta.env.VITE_API_BASE_URL}/api/products`,
         );
         setProducts(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
@@ -32,31 +32,45 @@ const Shop = () => {
     fetchAll();
   }, []);
 
-  // ── MULTI-FILTER LOGIC ──
   const filteredProducts = useMemo(() => {
     return products.filter((p) => {
-      const matchCategory = filters.category === "All" || p.category === filters.category;
-      const matchPrice = p.price <= filters.priceRange;
-      
-      const pSizes = p.sizes?.split(",") || [];
-      const matchSize = filters.selectedSizes.length === 0 || 
-                        filters.selectedSizes.some(s => pSizes.includes(s));
+      const matchCategory =
+        filters.category === "All" || p.category === filters.category;
 
-      const pColors = p.colors?.split(",") || [];
-      const matchColor = filters.selectedColors.length === 0 || 
-                         filters.selectedColors.some(c => pColors.includes(c));
+      const matchPrice = p.price <= filters.priceRange;
+
+      // ✅ Sizes FIX
+      const pSizes = Array.isArray(p.sizes)
+        ? p.sizes
+        : (p.sizes || "").split(",");
+
+      const matchSize =
+        filters.selectedSizes.length === 0 ||
+        filters.selectedSizes.some((s) => pSizes.includes(s));
+
+      // ✅ Colors FIX
+      const pColors = Array.isArray(p.colors)
+        ? p.colors.map((c) => c.toLowerCase())
+        : (p.colors || "").split(",").map((c) => c.trim().toLowerCase());
+
+      const matchColor =
+        filters.selectedColors.length === 0 ||
+        filters.selectedColors.some((c) => pColors.includes(c.toLowerCase()));
 
       return matchCategory && matchPrice && matchSize && matchColor;
     });
   }, [products, filters]);
+  
 
   const toggleFilter = (type, value) => {
-    setFilters(prev => {
+    setFilters((prev) => {
       const current = prev[type];
       const exists = current.includes(value);
       return {
         ...prev,
-        [type]: exists ? current.filter(i => i !== value) : [...current, value]
+        [type]: exists
+          ? current.filter((i) => i !== value)
+          : [...current, value],
       };
     });
   };
@@ -71,28 +85,36 @@ const Shop = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-12 flex flex-col md:flex-row gap-12">
-        
         {/* ── SIDEBAR FILTERS ── */}
         <aside className="w-full md:w-64 space-y-10 shrink-0">
           {/* Price Filter */}
           <div>
-            <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-900 mb-4">Max Price: ₹{filters.priceRange}</h4>
-            <input 
-              type="range" min="1000" max="20000" step="500"
+            <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-900 mb-4">
+              Max Price: ₹{filters.priceRange}
+            </h4>
+            <input
+              type="range"
+              min="1000"
+              max="20000"
+              step="500"
               value={filters.priceRange}
-              onChange={(e) => setFilters({...filters, priceRange: e.target.value})}
+              onChange={(e) =>
+                setFilters({ ...filters, priceRange: e.target.value })
+              }
               className="w-full accent-zinc-900"
             />
           </div>
 
           {/* Size Filter */}
           <div>
-            <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-900 mb-4">Sizes (UK)</h4>
+            <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-900 mb-4">
+              Sizes (UK)
+            </h4>
             <div className="grid grid-cols-3 gap-2">
-              {["7", "8", "9", "10", "11", "12"].map(size => (
-                <button 
+              {["7", "8", "9", "10", "11", "12"].map((size) => (
+                <button
                   key={size}
-                  onClick={() => toggleFilter('selectedSizes', size)}
+                  onClick={() => toggleFilter("selectedSizes", size)}
                   className={`py-2 text-xs font-bold rounded-lg border-2 transition-all ${filters.selectedSizes.includes(size) ? "bg-zinc-900 text-white border-zinc-900" : "border-zinc-100 text-zinc-400 hover:border-zinc-200"}`}
                 >
                   {size}
@@ -103,12 +125,14 @@ const Shop = () => {
 
           {/* Color Filter */}
           <div>
-            <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-900 mb-4">Colors</h4>
+            <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-900 mb-4">
+              Colors
+            </h4>
             <div className="flex flex-wrap gap-3">
-              {["Red", "Black", "White", "Blue", "Green"].map(color => (
-                <button 
+              {["Red", "Black", "White", "Blue", "Green"].map((color) => (
+                <button
                   key={color}
-                  onClick={() => toggleFilter('selectedColors', color)}
+                  onClick={() => toggleFilter("selectedColors", color)}
                   className={`w-8 h-8 rounded-full border-2 transition-all ${filters.selectedColors.includes(color) ? "border-zinc-900 scale-110" : "border-zinc-100"}`}
                   style={{ backgroundColor: color.toLowerCase() }}
                 />
@@ -116,8 +140,15 @@ const Shop = () => {
             </div>
           </div>
 
-          <button 
-            onClick={() => setFilters({ category: "All", priceRange: 20000, selectedSizes: [], selectedColors: [] })}
+          <button
+            onClick={() =>
+              setFilters({
+                category: "All",
+                priceRange: 20000,
+                selectedSizes: [],
+                selectedColors: [],
+              })
+            }
             className="w-full py-3 text-[10px] font-black uppercase tracking-widest border border-zinc-200 rounded-xl hover:bg-zinc-50 transition-all"
           >
             Reset Filters
@@ -127,14 +158,18 @@ const Shop = () => {
         {/* ── PRODUCT GRID ── */}
         <main className="flex-1">
           <div className="flex justify-between items-center mb-8">
-             <p className="text-[10px] font-bold uppercase text-zinc-400 tracking-widest">{filteredProducts.length} Results Found</p>
+            <p className="text-[10px] font-bold uppercase text-zinc-400 tracking-widest">
+              {filteredProducts.length} Results Found
+            </p>
           </div>
 
           {loading ? (
-             <div className="flex justify-center py-20 animate-spin"><div className="h-8 w-8 border-t-2 border-orange-500 rounded-full"/></div>
+            <div className="flex justify-center py-20 animate-spin">
+              <div className="h-8 w-8 border-t-2 border-orange-500 rounded-full" />
+            </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredProducts.map(product => (
+              {filteredProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>

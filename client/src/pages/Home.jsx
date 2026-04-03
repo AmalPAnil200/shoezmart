@@ -9,6 +9,45 @@ import Hero from "../components/Hero";
 // Matches the categories in your Navbar
 const FILTERS = ["All", "Men", "Women", "Kids", "Sale"];
 
+const DEMO_PRODUCTS = [
+  {
+    id: "demo-1",
+    name: "Air Jordan 1 Retro",
+    price: 15999,
+    category: "Basketball",
+    image:
+      "https://img.freepik.com/free-photo/shoes_1203-8153.jpg?t=st=1775185735~exp=1775189335~hmac=1c7860383d4fd49d4739da4f9e38baafa9a46392c54c51acf513c7024e7f7dbc&w=1480",
+    stock: 10,
+  },
+  {
+    id: "demo-2",
+    name: "Streetwear Cargo Low",
+    price: 8499,
+    category: "Streetwear",
+    image:
+      "https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?q=80&w=1996",
+    stock: 5,
+  },
+  {
+    id: "demo-3",
+    name: "Zoom Alpha Flyer",
+    price: 21000,
+    category: "Athletic",
+    image:
+      "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=2070",
+    stock: 8,
+  },
+  {
+    id: "demo-4",
+    name: "Classic Urban Walker",
+    price: 5999,
+    category: "Streetwear",
+    image:
+      "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?q=80&w=1925",
+    stock: 12,
+  },
+];
+
 const Home = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -16,9 +55,13 @@ const Home = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-
   const vibes = [
-    { name: "Basketball", path: "/basketball", label: "Performance", img: "..." },
+    {
+      name: "Basketball",
+      path: "/basketball",
+      label: "Performance",
+      img: "...",
+    },
     { name: "Streetwear", path: "/streetwear", label: "Lifestyle", img: "..." },
     { name: "Athletic", path: "/athletic", label: "Running", img: "..." },
   ];
@@ -35,10 +78,20 @@ const Home = () => {
         const url = searchQuery
           ? `${API_BASE_URL}/api/products/search?q=${searchQuery}`
           : `${API_BASE_URL}/api/products`;
+
         const res = await axios.get(url);
-        setProducts(Array.isArray(res.data) ? res.data : []);
+        const data = Array.isArray(res.data) ? res.data : [];
+
+        // ✨ CHECK IF DATA IS EMPTY
+        if (data.length === 0) {
+          console.warn("Home: No products found, showing demo set.");
+          setProducts(DEMO_PRODUCTS);
+        } else {
+          setProducts(data);
+        }
       } catch (err) {
-        console.error("Could not load shoes:", err);
+        console.error("Could not load shoes, falling back to demo:", err);
+        setProducts(DEMO_PRODUCTS); // Show demo products on error too
       } finally {
         setLoading(false);
       }
@@ -51,10 +104,10 @@ const Home = () => {
     return activeFilter === "All"
       ? products
       : products.filter(
-        (p) =>
-          p.category?.toLowerCase() === activeFilter.toLowerCase() ||
-          p.name?.toLowerCase().includes(activeFilter.toLowerCase()),
-      );
+          (p) =>
+            p.category?.toLowerCase() === activeFilter.toLowerCase() ||
+            p.name?.toLowerCase().includes(activeFilter.toLowerCase()),
+        );
   }, [products, activeFilter]);
 
   return (
@@ -105,14 +158,16 @@ const Home = () => {
           ))}
         </div>
         <div className="flex justify-center mt-12">
-          <Link to="/shop" className="bg-zinc-900 text-white px-10 py-4 rounded-full font-black uppercase tracking-widest text-xs hover:bg-orange-600 transition-all">
+          <Link
+            to="/shop"
+            className="bg-zinc-900 text-white px-10 py-4 rounded-full font-black uppercase tracking-widest text-xs hover:bg-orange-600 transition-all"
+          >
             View Full Collection
           </Link>
         </div>
       </section>
 
       <section className="max-w-7xl mx-auto px-6 py-16">
-
         {/* Section header */}
         <div className="flex items-end justify-between mb-8">
           <div>
@@ -123,7 +178,9 @@ const Home = () => {
               The Season's <br />
               <span
                 className="text-transparent bg-clip-text"
-                style={{ backgroundImage: "linear-gradient(110deg, #f97316, #e52e71)" }}
+                style={{
+                  backgroundImage: "linear-gradient(110deg, #f97316, #e52e71)",
+                }}
               >
                 Finest Kicks
               </span>
@@ -134,15 +191,24 @@ const Home = () => {
             className="hidden md:flex items-center gap-2 text-xs font-black uppercase tracking-widest text-zinc-400 hover:text-zinc-900 transition-colors"
           >
             View All
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4-4 4M3 12h18" />
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M17 8l4 4-4 4M3 12h18"
+              />
             </svg>
           </a>
         </div>
 
         {/* ── Asymmetric tile grid ── */}
         <div className="grid grid-cols-12 grid-rows-[280px_280px] gap-4">
-
           {/* Tile 1 — large left (spans 2 rows) */}
           <div className="col-span-12 md:col-span-5 row-span-2 relative rounded-3xl overflow-hidden group cursor-pointer">
             <img
@@ -188,8 +254,12 @@ const Home = () => {
               Lifestyle
             </span>
             <div className="absolute bottom-6 left-6 text-white">
-              <p className="text-[10px] uppercase tracking-[0.2em] font-semibold text-white/60 mb-0.5">Streetwear</p>
-              <h3 className="text-xl font-black uppercase italic">Urban Core</h3>
+              <p className="text-[10px] uppercase tracking-[0.2em] font-semibold text-white/60 mb-0.5">
+                Streetwear
+              </p>
+              <h3 className="text-xl font-black uppercase italic">
+                Urban Core
+              </h3>
             </div>
           </div>
 
@@ -208,8 +278,12 @@ const Home = () => {
               Limited
             </span>
             <div className="absolute bottom-6 left-6 text-white">
-              <p className="text-[10px] uppercase tracking-[0.2em] font-semibold text-white/50 mb-0.5">Exclusive</p>
-              <h3 className="text-xl font-black uppercase italic">Only 50 Pairs</h3>
+              <p className="text-[10px] uppercase tracking-[0.2em] font-semibold text-white/50 mb-0.5">
+                Exclusive
+              </p>
+              <h3 className="text-xl font-black uppercase italic">
+                Only 50 Pairs
+              </h3>
             </div>
           </div>
 
@@ -225,8 +299,12 @@ const Home = () => {
               Performance
             </span>
             <div className="absolute bottom-6 left-6 text-white">
-              <p className="text-[10px] uppercase tracking-[0.2em] font-semibold text-white/60 mb-0.5">Basketball</p>
-              <h3 className="text-xl font-black uppercase italic">Court Dominator</h3>
+              <p className="text-[10px] uppercase tracking-[0.2em] font-semibold text-white/60 mb-0.5">
+                Basketball
+              </p>
+              <h3 className="text-xl font-black uppercase italic">
+                Court Dominator
+              </h3>
             </div>
 
             {/* Floating price tag */}
@@ -237,7 +315,6 @@ const Home = () => {
               <p className="text-lg font-black text-zinc-900 leading-none">₹2,499</p>
             </div> */}
           </div>
-
         </div>
       </section>
 
@@ -249,7 +326,15 @@ const Home = () => {
             {[
               {
                 icon: (
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="w-6 h-6"
+                  >
                     <path d="M5 12h14M12 5l7 7-7 7" />
                   </svg>
                 ),
@@ -260,7 +345,15 @@ const Home = () => {
               },
               {
                 icon: (
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="w-6 h-6"
+                  >
                     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                   </svg>
                 ),
@@ -271,8 +364,17 @@ const Home = () => {
               },
               {
                 icon: (
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
-                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" />
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="w-6 h-6"
+                  >
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                    <path d="M3 3v5h5" />
                   </svg>
                 ),
                 gradient: "from-blue-50 to-sky-50",
@@ -282,7 +384,15 @@ const Home = () => {
               },
               {
                 icon: (
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="w-6 h-6"
+                  >
                     <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                   </svg>
                 ),
@@ -317,8 +427,6 @@ const Home = () => {
           </div>
         </div>
       </section>
-
-
 
       {/* --- Visual Categories Section --- */}
       <section className="max-w-7xl mx-auto px-6 py-16">
@@ -402,7 +510,10 @@ const Home = () => {
       <div className="bg-orange-500 py-4 overflow-hidden whitespace-nowrap border-y-2 border-zinc-900">
         <div className="flex animate-marquee">
           {[...Array(10)].map((_, i) => (
-            <span key={i} className="text-zinc-900 font-black italic uppercase text-2xl mx-8">
+            <span
+              key={i}
+              className="text-zinc-900 font-black italic uppercase text-2xl mx-8"
+            >
               Limited Drops Available • 100% Authentic • ShoeZmart Exclusive •
             </span>
           ))}

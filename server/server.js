@@ -143,7 +143,7 @@ app.get("/api/products", async (req, res) => {
 
     res.json(formattedProducts);
   } catch (error) {
-    console.error(error); // 🔥 important for debugging
+    console.error("Products API Error:", error); // 🔥 log it
     res.status(500).json({ message: "Internal Server Error" });
   }
 });
@@ -206,8 +206,6 @@ app.post(
 //   }
 // });
 
-// server.js
-// server.js
 app.get("/api/products/search", async (req, res) => {
   try {
     const { q, category } = req.query;
@@ -259,7 +257,6 @@ app.get("/api/products/:id", async (req, res) => {
 
 // ─── Admin Routes (With Image Upload) ─────────────────────────────────────────
 
-// Fixed: Only ONE POST route for adding products
 app.post(
   "/api/admin/products",
   authenticateToken,
@@ -286,8 +283,8 @@ app.post(
         purchasePrice,
         category,
         stock,
-        colors, // Save the string "Red, Blue"
-        sizes, // Save the string "7, 8, 9"
+        colors,
+        sizes,
         description,
         image: req.file.filename,
       });
