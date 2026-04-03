@@ -1,33 +1,44 @@
 import { Routes, Route, useLocation } from "react-router-dom";
-import { PayPalScriptProvider } from "@paypal/react-paypal-js";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
+
+// Context & Protection
+import { CartProvider } from "./context/CartContext";
+import { WishlistProvider } from "./context/WishlistContext";
+import ProtectedRoute from "./components/ProtectedRoute";
+
+// Common Components
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
-import { CartProvider } from "./context/CartContext";
+
+// Public Pages
 import Home from "./pages/Home";
 import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import CategoryPage from "./pages/CategoryPage";
-import AdminPanel from "./pages/admin/AdminPanel";
-import { WishlistProvider } from "./context/WishlistContext";
-import Wishlist from "./pages/Wishlist";
 import SearchPage from "./pages/SearchPage";
 import Shop from "./pages/Shop";
-import OrdersPage from "./pages/admin/OrdersPage";
+import Wishlist from "./pages/Wishlist";
 import Checkout from "./pages/Checkout";
-import AnalyticsChart from "./pages/admin/AnalyticsChart";
-import ProtectedRoute from "./components/ProtectedRoute"; // 👈 Added
+
+// Company Pages
 import About from "./pages/about";
 import Careers from "./pages/Careers";
 import Press from "./pages/Press";
 import Blog from "./pages/Blog";
+
+// Admin Pages
+import AdminPanel from "./pages/admin/AdminPanel";
+import OrdersPage from "./pages/admin/OrdersPage";
+import AnalyticsChart from "./pages/admin/AnalyticsChart";
 import AdminLogin from "./pages/admin/AdminLogin";
-import { Analytics } from "@vercel/analytics/next";
 
 function App() {
   const location = useLocation();
-  // This now works because the Router is in main.jsx!
+
+  // Route Checkers for UI visibility
   const isAdminPath = location.pathname.startsWith("/admin");
   const isLoginPath =
     location.pathname.startsWith("/login") ||
@@ -37,15 +48,29 @@ function App() {
   return (
     <CartProvider>
       <WishlistProvider>
+        {/* Vercel Deployment Tracking */}
         <Analytics />
-        <div className="app-wrapper min-h-screen flex flex-col">
-          {/* Navbar hides on Admin routes */}
+        <SpeedInsights />
+
+        <div className="app-wrapper min-h-screen flex flex-col font-sans selection:bg-orange-100 selection:text-orange-900">
+          {/* Global Navbar - Hidden on Admin/Auth pages */}
           {!isAdminPath && !isLoginPath && <Navbar />}
 
           <main className="content flex-grow">
             <Routes>
+              {/* ── PUBLIC ROUTES ── */}
               <Route path="/" element={<Home />} />
-              {/* Category Routes */}
+              <Route path="/shop" element={<Shop />} />
+              <Route path="/product/:id" element={<ProductDetail />} />
+              <Route path="/search" element={<SearchPage />} />
+              <Route path="/cart" element={<Cart />} />
+              <Route path="/wishlist" element={<Wishlist />} />
+
+              {/* ── AUTH ROUTES ── */}
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<SignUp />} />
+
+              {/* ── DYNAMIC CATEGORY ROUTES ── */}
               <Route
                 path="/men"
                 element={
@@ -56,7 +81,6 @@ function App() {
                   />
                 }
               />
-              t
               <Route
                 path="/women"
                 element={
@@ -87,28 +111,8 @@ function App() {
                   />
                 }
               />
-              {/* Existing Routes */}
-              <Route
-                path="/men"
-                element={
-                  <CategoryPage
-                    category="men"
-                    displayName="Men's"
-                    bannerColor="bg-blue-50"
-                  />
-                }
-              />
-              <Route
-                path="/women"
-                element={
-                  <CategoryPage
-                    category="women"
-                    displayName="Women's"
-                    bannerColor="bg-pink-50"
-                  />
-                }
-              />
-              {/* 🚀 NEW VIBE ROUTES */}
+
+              {/* ── VIBE/COLLECTION ROUTES ── */}
               <Route
                 path="/basketball"
                 element={
@@ -139,31 +143,38 @@ function App() {
                   />
                 }
               />
-              {/* Functional Routes */}
-              <Route path="/product/:id" element={<ProductDetail />} />
-              <Route path="/cart" element={<Cart />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<SignUp />} />
-              <Route path="/wishlist" element={<Wishlist />} />
-              <Route path="/search" element={<SearchPage />} />
-              <Route path="/shop" element={<Shop />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/careers" element={<Careers />} />
-              <Route path="/press" element={<Press />} />
-              <Route path="/blog" element={<Blog />} />
-              <Route
-                path="/admin/orders"
-                element={
-                  <ProtectedRoute adminOnly>
-                    <OrdersPage />
-                  </ProtectedRoute>
-                }
-              />
+
+              {/* ── PROTECTED USER ROUTES ── */}
               <Route
                 path="/checkout"
                 element={
                   <ProtectedRoute>
                     <Checkout />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* ── COMPANY ROUTES ── */}
+              <Route path="/about" element={<About />} />
+              <Route path="/careers" element={<Careers />} />
+              <Route path="/press" element={<Press />} />
+              <Route path="/blog" element={<Blog />} />
+
+              {/* ── ADMIN ROUTES (STRICT PROTECTION) ── */}
+              <Route path="/admin/login" element={<AdminLogin />} />
+              <Route
+                path="/admin"
+                element={
+                  <ProtectedRoute adminOnly>
+                    <AdminPanel />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/orders"
+                element={
+                  <ProtectedRoute adminOnly>
+                    <OrdersPage />
                   </ProtectedRoute>
                 }
               />
@@ -175,20 +186,10 @@ function App() {
                   </ProtectedRoute>
                 }
               />
-              {/* Admin Route */}
-              <Route path="/admin/login" element={<AdminLogin />} />
-              <Route
-                path="/admin"
-                element={
-                  <ProtectedRoute adminOnly>
-                    <AdminPanel />
-                  </ProtectedRoute>
-                }
-              />
             </Routes>
           </main>
 
-          {/* Footer hides on Admin routes */}
+          {/* Global Footer - Hidden on Admin/Auth pages */}
           {!isAdminPath && !isLoginPath && <Footer />}
         </div>
       </WishlistProvider>
